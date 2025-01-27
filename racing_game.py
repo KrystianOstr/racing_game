@@ -35,9 +35,9 @@ class Car:
             self.position_x -= self.speed
         if keys[pygame.K_RIGHT] and self.position_x < screen_width - self.image.get_width(): # ---->
             self.position_x += self.speed
-        if keys[pygame.K_UP]:
-            self.speed = 10
-        if keys[pygame.K_DOWN]:
+        if keys[pygame.K_UP]: # speed up
+            self.speed = 10 
+        if keys[pygame.K_DOWN]: # speed down
             self.speed = 5
             
             
