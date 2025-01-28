@@ -37,9 +37,9 @@ class Car:
         if keys[pygame.K_RIGHT] and self.position_x < screen_width - self.image.get_width(): # ---->
             self.position_x += self.speed
         if keys[pygame.K_UP]:
-            self.speed += 5
+            self.speed = 10
         if keys[pygame.K_DOWN]:
-            self.speed -= 5
+            self.speed = 5
             
 # CLASS: BACKGROUND
 
@@ -77,28 +77,32 @@ class Background:
 
 class Obstacle:
     def __init__(self, image, position_x, position_y, speed):
-        self.image = pygame.image.load('./images/car.png')
+        self.image = pygame.image.load(image)
         self.image = pygame.transform.scale(self.image, (50, 50))
 
+        self.position_x = position_x
+        self.position_y = position_y
 
-    def move(self, speed):
-        pass
+        self.speed = speed
+
+
+    def move(self, screen_height, road_width, road_offset):
+        self.position_y += self.speed
+
+        if self.position_y > screen_height:
+            self.position_y = -50
+            self.position_x = road_offset + randint(0, road_width - 50)
+
 
     def draw(self, screen):
-        pass
+        screen.blit(self.image, (self.position_x, self.position_y))
 
 
 
-
-
-
-
-
-
-
-
-
-
+obstacles = [
+    Obstacle('./images/car.png', 250, -50, 5),
+    Obstacle('./images/car.png', 350, -200, 6),
+]
 
 background = Background('./images/road2.png', 200, 800, 600)
 player_car = Car('./images/car.png', 5, 400, 540)
@@ -119,6 +123,10 @@ while running:
     background.speed = player_car.speed
     background.move()
     background.draw(screen)
+
+    for obstacle in obstacles:
+        obstacle.move(600, 200, (800 - 200) // 2)
+        obstacle.draw(screen)
     
     player_car.draw(screen)
     keys = pygame.key.get_pressed()
