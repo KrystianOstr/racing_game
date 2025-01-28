@@ -31,11 +31,13 @@ class Car:
     def draw(self, screen):
         screen.blit(self.image, (self.position_x, self.position_y))
         
-    def move(self, keys, screen_width, screen_hight):
-        if keys[pygame.K_LEFT] and self.position_x > 0: # <----
+    def move(self, keys, road_offset, road_width):
+        if keys[pygame.K_LEFT] and self.position_x > road_offset: # <----
             self.position_x -= self.speed
-        if keys[pygame.K_RIGHT] and self.position_x < screen_width - self.image.get_width(): # ---->
+        if keys[pygame.K_RIGHT] and self.position_x < road_offset + road_width - self.image.get_width(): # ---->
             self.position_x += self.speed
+        
+        
         if keys[pygame.K_UP]:
             self.speed = 10
         if keys[pygame.K_DOWN]:
@@ -86,12 +88,22 @@ class Obstacle:
         self.speed = speed
 
 
-    def move(self, screen_height, road_width, road_offset):
-        self.position_y += self.speed
+    def move(self, screen_height, road_width, road_offset, all_obstacles):
+        self.position_y += self.speed + int(background.speed * 0.5)
 
         if self.position_y > screen_height:
             self.position_y = -50
-            self.position_x = road_offset + randint(0, road_width - 50)
+
+            valid_position = False
+
+            while not valid_position:
+                new_x = road_offset + randint(0, road_width - 50)
+                valid_position = all(abs(new_x - obstacle.position_x) > 50 for obstacle in all_obstacles if obstacle != self)
+        
+            self.position_x = new_x
+
+
+
 
 
     def draw(self, screen):
@@ -100,8 +112,8 @@ class Obstacle:
 
 
 obstacles = [
-    Obstacle('./images/car.png', 250, -50, 5),
-    Obstacle('./images/car.png', 350, -200, 6),
+    Obstacle('./images/enemy_car.png', 300, -50, 5),
+    Obstacle('./images/enemy_car.png', 400, -200, 6),
 ]
 
 background = Background('./images/road2.png', 200, 800, 600)
@@ -125,12 +137,12 @@ while running:
     background.draw(screen)
 
     for obstacle in obstacles:
-        obstacle.move(600, 200, (800 - 200) // 2)
+        obstacle.move(600, 200, (800 - 200) // 2, obstacles)
         obstacle.draw(screen)
     
     player_car.draw(screen)
     keys = pygame.key.get_pressed()
-    player_car.move(keys, 800, 600)
+    player_car.move(keys, background.x_offset, background.road_width)
     
     
     pygame.display.flip()
