@@ -1,4 +1,5 @@
 import pygame
+from random import randint
 
 pygame.init()
 
@@ -36,17 +37,71 @@ class Car:
         if keys[pygame.K_RIGHT] and self.position_x < screen_width - self.image.get_width(): # ---->
             self.position_x += self.speed
         if keys[pygame.K_UP]:
-            self.speed = 10
+            self.speed += 5
         if keys[pygame.K_DOWN]:
-            self.speed = 5
+            self.speed -= 5
             
-            
+# CLASS: BACKGROUND
+
+class Background:
+    def __init__(self, image, road_width, screen_width, screen_height):
+        self.image = pygame.image.load(image)
+        self.image = pygame.transform.scale(self.image, (road_width, screen_height))
+
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.road_width = road_width
+
+        self.x_offset = (screen_width - road_width) // 2
+
+        self.y1 = 0
+        self.y2 = -self.screen_height
+
+        self.speed = 5
+
+    def move(self):
+        self.y1 += self.speed
+        self.y2 += self.speed
+
+        if self.y1 >= self.screen_height:
+            self.y1 = self.y2 - self.screen_height
+        if self.y2 >= self.screen_height:
+            self.y2 = self.y1 - self.screen_height
 
 
+    def draw(self, screen):
+        screen.blit(self.image, (self.x_offset, self.y1))
+        screen.blit(self.image, (self.x_offset, self.y2))
+
+# CLASS: OBSTACLE
+
+class Obstacle:
+    def __init__(self, image, position_x, position_y, speed):
+        self.image = pygame.image.load('./images/car.png')
+        self.image = pygame.transform.scale(self.image, (50, 50))
+
+
+    def move(self, speed):
+        pass
+
+    def draw(self, screen):
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+background = Background('./images/road2.png', 200, 800, 600)
 player_car = Car('./images/car.png', 5, 400, 540)
-
-
-
 
 # main game loop
 
@@ -59,6 +114,12 @@ while running:
     screen.fill(background_color)
     
     draw_fps(screen, clock)
+
+
+    background.speed = player_car.speed
+    background.move()
+    background.draw(screen)
+    
     player_car.draw(screen)
     keys = pygame.key.get_pressed()
     player_car.move(keys, 800, 600)
