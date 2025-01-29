@@ -8,12 +8,14 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption('Racing Game')
 
+game_over = False
+
 background_color = (0,0,0)
 
 # DRAW FPS
 
-font = pygame.font.Font(None, 20)
 def draw_fps(screen, clock):
+    font = pygame.font.Font(None, 20)
     fps_text = font.render(f'FPS: {int(clock.get_fps())}', True, (255,255,255))
     screen.blit(fps_text, (10, 10))
 
@@ -48,10 +50,7 @@ class Car:
     
     def draw_rect(self, screen): #red border - delete after tests
         pygame.draw.rect(screen, (255, 0, 0), self.get_rect(), 2)
-        
-        
-               
-    
+
             
 # CLASS: BACKGROUND
 
@@ -122,8 +121,6 @@ class Obstacle:
         pygame.draw.rect(screen, (255, 0, 0), self.get_rect(), 2)
 
 
-
-
 obstacles = [
     Obstacle('./images/enemy_car.png', 300, -50, 5),
     Obstacle('./images/enemy_car.png', 400, -200, 6),
@@ -132,6 +129,49 @@ obstacles = [
 background = Background('./images/road2.png', 200, 800, 600)
 player_car = Car('./images/car.png', 5, 400, 540)
 
+
+# GAME OVER MODULE
+
+def game_over_screen():
+    font = pygame.font.Font(None, 50)
+    text = font.render("GAME OVER - R to Restart, ESC to Quit", True, (0,0,0))
+    text_rect = text.get_rect(center=(400,300))
+    
+    while True:
+        screen.fill((255,255,255))
+        screen.blit(text, text_rect)
+        pygame.display.flip()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    reset_game()
+                    return
+                elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    exit()
+
+
+# RESET GAME
+
+def reset_game():
+    global player_car, obstacles, background, game_over
+    
+    player_car = Car('./images/car.png', 5, 400, 540)
+    
+    obstacles = [
+    Obstacle('./images/enemy_car.png', 300, -50, 5),
+    Obstacle('./images/enemy_car.png', 400, -200, 6),
+]
+    
+    background.speed = 5
+
+    game_over = False
+    
 # main game loop
 
 running = True
@@ -139,6 +179,10 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            
+    if game_over:
+        game_over_screen()
+        continue
         
     screen.fill(background_color)
     
@@ -154,7 +198,7 @@ while running:
         obstacle.move(600, 200, (800 - 200) // 2, obstacles)
         
         if player_car.get_rect().colliderect(obstacle.get_rect()):
-            running = False
+            game_over = True
             
         obstacle.draw_rect(screen) #red border - delete after tests
         
