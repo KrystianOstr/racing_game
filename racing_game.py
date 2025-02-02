@@ -4,6 +4,7 @@ import sys
 from random import randint
 
 pygame.init()
+pygame.mixer.init()
 
 clock = pygame.time.Clock()
 
@@ -15,6 +16,19 @@ game_over = False
 # DYNAMIC PATH FOR EXE
 
 BASE_PATH =  Path(getattr(sys, '_MEIPASS', Path(__file__).parent))
+
+# SOUNDS
+
+collision_sound = pygame.mixer.Sound(BASE_PATH / 'sounds' / 'collision.mp3')
+
+pygame.mixer.music.load(BASE_PATH / 'sounds' / 'background_music.mp3')
+pygame.mixer.music.play(-1)
+
+# FONTS
+
+font_small = pygame.font.Font(None, 20)  # for FPS
+font_medium = pygame.font.Font(None, 25)  # for score
+font_large = pygame.font.Font(None, 50)  # for Game Over
 
 # COLORS
 
@@ -48,6 +62,7 @@ def save_high_score(score):
 
 class Car:
     def __init__(self, image, speed, position_x, position_y):
+        # print(f"Scaling image: {image}") # FPS TEST TEST
         self.image = pygame.image.load(BASE_PATH / 'images' / image)
         self.image = pygame.transform.scale(self.image, (30, 50))
         self.speed = speed
@@ -154,8 +169,7 @@ background = Background('road2.png', 200, 800, 600)
 player_car = Car('car.png', 5, 400, 540)
 
 
-def draw_text(screen, text, size, x, y, color):
-    font = pygame.font.Font(None, size)
+def draw_text(screen, text, font, x, y, color):
     text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect(center=(x,y))
     
@@ -168,11 +182,14 @@ def game_over_screen():
     global high_score
     save_high_score(score)
 
+    pygame.mixer.music.load(BASE_PATH / 'sounds' / 'gameover.mp3')
+    pygame.mixer.music.play(-1)
+
     while True:
         screen.fill((255,255,255))
 
-        draw_text(screen, 'GAME OVER - R to Restart, ESC to Quit', 50, 400, 300, black)
-        draw_text(screen, f'High score: {int(high_score)}', 50,400,250,red)
+        draw_text(screen, 'GAME OVER - R to Restart, ESC to Quit', font_large, 400, 300, black)
+        draw_text(screen, f'High score: {int(high_score)}', font_large,400,250,red)
         pygame.display.flip()
         
         for event in pygame.event.get():
@@ -204,6 +221,9 @@ def reset_game():
     background.speed = 5
     score = 0
 
+    pygame.mixer.music.load(BASE_PATH / 'sounds' / 'background_music.mp3')
+    pygame.mixer.music.play(-1)
+
     game_over = False
     
 # main game loop
@@ -220,9 +240,9 @@ while running:
         
     screen.fill(black)
     
-    draw_text(screen, f'FPS: {int(clock.get_fps())}', 20, 50, 10, white)
-    draw_text(screen, f'Score: {int(score)}', 25, 700, 40, white)
-    draw_text(screen, f'High score: {int(high_score)}', 25, 700, 10, white)
+    # draw_text(screen, f'FPS: {int(clock.get_fps())}', font_small, 50, 10, white)
+    draw_text(screen, f'Score: {int(score)}', font_medium, 700, 40, white)
+    draw_text(screen, f'High score: {int(high_score)}', font_medium, 700, 10, white)
 
 
 
@@ -230,18 +250,20 @@ while running:
     background.move()
     background.draw(screen)
 
-    player_car.draw_rect(screen) #red border - delete after tests
+    # player_car.draw_rect(screen) #red border - delete after tests
     for obstacle in obstacles:
         obstacle.move(600, 200, (800 - 200) // 2, obstacles)
         
         if player_car.get_rect().colliderect(obstacle.get_rect()):
+            collision_sound.play()
             game_over = True
             
-        obstacle.draw_rect(screen) #red border - delete after tests
-        
+        # obstacle.draw_rect(screen) #red border - delete after tests
         
         obstacle.draw(screen)
     
+    # print(f"FPS: {clock.get_fps()}") $ FPS TEST TEST
+
     player_car.draw(screen)
     keys = pygame.key.get_pressed()
     player_car.move(keys, background.x_offset, background.road_width)
