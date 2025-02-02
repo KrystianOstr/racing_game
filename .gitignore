@@ -1,1 +1,5 @@
 .venv/
+build/
+dist/
+racing_game.spec
+highscore.txt

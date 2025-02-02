@@ -1,4 +1,6 @@
 import pygame
+from pathlib import Path
+import sys
 from random import randint
 
 pygame.init()
@@ -9,6 +11,10 @@ screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption('Racing Game')
 
 game_over = False
+
+# DYNAMIC PATH FOR EXE
+
+BASE_PATH =  Path(getattr(sys, '_MEIPASS', Path(__file__).parent))
 
 # COLORS
 
@@ -42,7 +48,7 @@ def save_high_score(score):
 
 class Car:
     def __init__(self, image, speed, position_x, position_y):
-        self.image = pygame.image.load(image)
+        self.image = pygame.image.load(BASE_PATH / 'images' / image)
         self.image = pygame.transform.scale(self.image, (30, 50))
         self.speed = speed
         self.position_x = position_x
@@ -74,7 +80,7 @@ class Car:
 
 class Background:
     def __init__(self, image, road_width, screen_width, screen_height):
-        self.image = pygame.image.load(image)
+        self.image = pygame.image.load(BASE_PATH / 'images' / image)
         self.image = pygame.transform.scale(self.image, (road_width, screen_height))
 
         self.screen_width = screen_width
@@ -106,7 +112,7 @@ class Background:
 
 class Obstacle:
     def __init__(self, image, position_x, position_y, speed):
-        self.image = pygame.image.load(image)
+        self.image = pygame.image.load(BASE_PATH / 'images' / image)
         self.image = pygame.transform.scale(self.image, (30, 50))
 
         self.position_x = position_x
@@ -140,12 +146,12 @@ class Obstacle:
 
 
 obstacles = [
-    Obstacle('./images/enemy_car.png', 300, -50, 5),
-    Obstacle('./images/enemy_car.png', 400, -200, 6),
+    Obstacle('enemy_car.png', 300, -50, 5),
+    Obstacle('enemy_car.png', 400, -200, 6),
 ]
 
-background = Background('./images/road2.png', 200, 800, 600)
-player_car = Car('./images/car.png', 5, 400, 540)
+background = Background('road2.png', 200, 800, 600)
+player_car = Car('car.png', 5, 400, 540)
 
 
 def draw_text(screen, text, size, x, y, color):
@@ -188,11 +194,11 @@ def game_over_screen():
 def reset_game():
     global player_car, obstacles, background, game_over, score
     
-    player_car = Car('./images/car.png', 5, 400, 540)
+    player_car = Car('car.png', 5, 400, 540)
     
     obstacles = [
-    Obstacle('./images/enemy_car.png', 300, -50, 5),
-    Obstacle('./images/enemy_car.png', 400, -200, 6),
+    Obstacle('enemy_car.png', 300, -50, 5),
+    Obstacle('enemy_car.png', 400, -200, 6),
 ]
     
     background.speed = 5
