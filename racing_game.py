@@ -10,7 +10,12 @@ pygame.display.set_caption('Racing Game')
 
 game_over = False
 
-background_color = (0,0,0)
+# COLORS
+
+black = (0,0,0)
+white = (255,255,255)
+red = (255,0,0)
+
 
 # score
 
@@ -23,18 +28,6 @@ try:
 except (FileNotFoundError, ValueError):
         high_score = 0
 
-# DRAW SCORE
-def draw_score(screen, score):
-    font = pygame.font.Font(None, 25)
-    score_text = font.render(f'Score: {int(score)}', True, (255,255,255))
-    screen.blit(score_text, (650, 10 ))
-
-# DRAW FPS
-
-def draw_fps(screen, clock):
-    font = pygame.font.Font(None, 20)
-    fps_text = font.render(f'FPS: {int(clock.get_fps())}', True, (255,255,255))
-    screen.blit(fps_text, (10, 10))
 
 def save_high_score(score):
     global high_score
@@ -155,18 +148,25 @@ background = Background('./images/road2.png', 200, 800, 600)
 player_car = Car('./images/car.png', 5, 400, 540)
 
 
+def draw_text(screen, text, size, x, y, color):
+    font = pygame.font.Font(None, size)
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect(center=(x,y))
+    
+    screen.blit(text_surface, text_rect)
+
+
 # GAME OVER MODULE
 
 def game_over_screen():
+    global high_score
     save_high_score(score)
 
-    font = pygame.font.Font(None, 50)
-    text = font.render("GAME OVER - R to Restart, ESC to Quit", True, (0,0,0))
-    text_rect = text.get_rect(center=(400,300))
-    
     while True:
         screen.fill((255,255,255))
-        screen.blit(text, text_rect)
+
+        draw_text(screen, 'GAME OVER - R to Restart, ESC to Quit', 50, 400, 300, black)
+        draw_text(screen, f'High score: {int(high_score)}', 50,400,250,red)
         pygame.display.flip()
         
         for event in pygame.event.get():
@@ -212,10 +212,12 @@ while running:
         game_over_screen()
         continue
         
-    screen.fill(background_color)
+    screen.fill(black)
     
-    draw_fps(screen, clock)
-    draw_score(screen, score)
+    draw_text(screen, f'FPS: {int(clock.get_fps())}', 20, 50, 10, white)
+    draw_text(screen, f'Score: {int(score)}', 25, 700, 40, white)
+    draw_text(screen, f'High score: {int(high_score)}', 25, 700, 10, white)
+
 
 
     background.speed = player_car.speed
