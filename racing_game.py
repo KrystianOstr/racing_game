@@ -25,15 +25,9 @@ except (FileNotFoundError, ValueError):
 
 # DRAW SCORE
 def draw_score(screen, score):
-    if player_car.speed == 10:
-        score += 3
-    else:
-        score += 1
-
     font = pygame.font.Font(None, 25)
     score_text = font.render(f'Score: {int(score)}', True, (255,255,255))
     screen.blit(score_text, (650, 10 ))
-    return score
 
 # DRAW FPS
 
@@ -41,6 +35,14 @@ def draw_fps(screen, clock):
     font = pygame.font.Font(None, 20)
     fps_text = font.render(f'FPS: {int(clock.get_fps())}', True, (255,255,255))
     screen.blit(fps_text, (10, 10))
+
+def save_high_score(score):
+    global high_score
+
+    if score > high_score:
+        high_score = score
+        with open("highscore.txt", 'w') as file:
+            file.write(str(int(high_score)))
 
 
 # CLASS: CAR
@@ -156,6 +158,8 @@ player_car = Car('./images/car.png', 5, 400, 540)
 # GAME OVER MODULE
 
 def game_over_screen():
+    save_high_score(score)
+
     font = pygame.font.Font(None, 50)
     text = font.render("GAME OVER - R to Restart, ESC to Quit", True, (0,0,0))
     text_rect = text.get_rect(center=(400,300))
@@ -182,7 +186,7 @@ def game_over_screen():
 # RESET GAME
 
 def reset_game():
-    global player_car, obstacles, background, game_over
+    global player_car, obstacles, background, game_over, score
     
     player_car = Car('./images/car.png', 5, 400, 540)
     
@@ -192,6 +196,7 @@ def reset_game():
 ]
     
     background.speed = 5
+    score = 0
 
     game_over = False
     
@@ -202,7 +207,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-            
+        
     if game_over:
         game_over_screen()
         continue
@@ -210,7 +215,7 @@ while running:
     screen.fill(background_color)
     
     draw_fps(screen, clock)
-    score = draw_score(screen, score)
+    draw_score(screen, score)
 
 
     background.speed = player_car.speed
@@ -233,10 +238,11 @@ while running:
     keys = pygame.key.get_pressed()
     player_car.move(keys, background.x_offset, background.road_width)
     
-    # if player_car.speed == 10:
-    #     score += 1.2
-    # else:
-    #     score += 1
+    if not game_over:   
+        if player_car.speed == 10:
+            score += 1.2
+        else:
+            score += 1
     
     pygame.display.flip()
     
