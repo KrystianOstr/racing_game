@@ -12,6 +12,29 @@ game_over = False
 
 background_color = (0,0,0)
 
+# score
+
+score = 0
+
+try:
+    with open('highscore.txt', 'r') as file:
+        content = file.read().strip()
+        high_score = int(content) if content.isdigit() else 0
+except (FileNotFoundError, ValueError):
+        high_score = 0
+
+# DRAW SCORE
+def draw_score(screen, score):
+    if player_car.speed == 10:
+        score += 3
+    else:
+        score += 1
+
+    font = pygame.font.Font(None, 25)
+    score_text = font.render(f'Score: {int(score)}', True, (255,255,255))
+    screen.blit(score_text, (650, 10 ))
+    return score
+
 # DRAW FPS
 
 def draw_fps(screen, clock):
@@ -187,6 +210,7 @@ while running:
     screen.fill(background_color)
     
     draw_fps(screen, clock)
+    score = draw_score(screen, score)
 
 
     background.speed = player_car.speed
@@ -209,6 +233,10 @@ while running:
     keys = pygame.key.get_pressed()
     player_car.move(keys, background.x_offset, background.road_width)
     
+    # if player_car.speed == 10:
+    #     score += 1.2
+    # else:
+    #     score += 1
     
     pygame.display.flip()
     
