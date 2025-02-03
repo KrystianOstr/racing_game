@@ -27,7 +27,7 @@ game_over_music = (BASE_PATH / 'sounds' / 'gameover.mp3')
 def play_music(sound):
     pygame.mixer.music.load(sound)
     pygame.mixer.music.play(-1)
-    pygame.mixer.music.set_volume(0.1)
+    pygame.mixer.music.set_volume(0.3)
     
 play_music(background_music)
     
@@ -232,7 +232,7 @@ class Menu:
             
             self.draw_controls_info()
             
-            self.draw_settings(volume)
+            self.draw_settings()
             pygame.display.flip()
             
             for event in pygame.event.get():
@@ -272,7 +272,9 @@ class Menu:
             controls_rect = controls_surface.get_rect(center=(400, 50 + j * 30))
             self.screen.blit(controls_surface, controls_rect)
     
-    def draw_settings(self, volume):   
+    def draw_settings(self): 
+        volume = pygame.mixer.music.get_volume()
+        
         for i, option in enumerate(self.settings_options):
             color = self.red if i == self.current_setting else self.white
             text_surface = self.font.render(option, True, color)
@@ -280,7 +282,8 @@ class Menu:
             self.screen.blit(text_surface, text_rect)
             
             if option == "Volume":
-                volume_bar = "|" * int(volume * 10) + '-' * (10 - int(volume * 10))
+                bar_filled = round(volume * 10)
+                volume_bar = "|" * bar_filled + '-' * (10 - bar_filled)
                 volume_surface = self.font.render(f'[{volume_bar}]', True, self.white)
                 volume_rect = volume_surface.get_rect(center=(600, 300 + i * 60))
                 self.screen.blit(volume_surface, volume_rect)
