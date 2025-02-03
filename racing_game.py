@@ -30,9 +30,6 @@ def play_music(sound):
     pygame.mixer.music.set_volume(0.3)
     
 play_music(background_music)
-    
-    
-# play_music(background_music)
 
 # FONTS
 
@@ -83,9 +80,9 @@ class Car:
         screen.blit(self.image, (self.position_x, self.position_y))
         
     def move(self, keys, road_offset, road_width):
-        if keys[pygame.K_LEFT] and self.position_x > road_offset: # <----
+        if keys[pygame.K_LEFT] and self.position_x > road_offset - 20:  # <---
             self.position_x -= self.speed
-        if keys[pygame.K_RIGHT] and self.position_x < road_offset + road_width - self.image.get_width(): # ---->
+        if keys[pygame.K_RIGHT] and self.position_x < road_offset + road_width + 20 - self.image.get_width():  # --->
             self.position_x += self.speed
         
         
@@ -106,7 +103,9 @@ class Car:
 class Background:
     def __init__(self, image, road_width, screen_width, screen_height):
         self.image = pygame.image.load(BASE_PATH / 'images' / image)
-        self.image = pygame.transform.scale(self.image, (road_width, screen_height))
+        # self.image = pygame.transform.scale(self.image, (road_width, screen_height))
+        # print(self.image.get_width(), self.image.get_height())
+
 
         self.screen_width = screen_width
         self.screen_height = screen_height
@@ -130,8 +129,8 @@ class Background:
 
 
     def draw(self, screen):
-        screen.blit(self.image, (self.x_offset, self.y1))
-        screen.blit(self.image, (self.x_offset, self.y2))
+        screen.blit(self.image, (0, self.y1))
+        screen.blit(self.image, (0, self.y2))
 
 # CLASS: OBSTACLE
 
@@ -157,7 +156,8 @@ class Obstacle:
             valid_position = False
 
             while not valid_position:
-                new_x = road_offset + randint(0, road_width - 50)
+                new_x = road_offset - 10 + randint(0, road_width + 20)
+
                 valid_position = all(abs(new_x - obstacle.position_x) > 50 for obstacle in all_obstacles if obstacle != self)
         
             self.position_x = new_x
@@ -296,7 +296,7 @@ obstacles = [
     Obstacle('enemy_car.png', 400, -200, 6),
 ]
 
-background = Background('road2.png', 200, 800, 600)
+background = Background('road5.png', 200, 800, 600)
 player_car = Car('car.png', 5, 400, 540)
 
 
@@ -376,15 +376,14 @@ while running:
         
     screen.fill(black)
     
-    # draw_text(screen, f'FPS: {int(clock.get_fps())}', font_small, 50, 10, white)
-    draw_text(screen, f'Score: {int(score)}', font_medium, 700, 40, white)
-    draw_text(screen, f'High score: {int(high_score)}', font_medium, 700, 10, white)
-
-
-
     background.speed = player_car.speed
     background.move()
     background.draw(screen)
+
+    # draw_text(screen, f'FPS: {int(clock.get_fps())}', font_small, 50, 10, white)
+    draw_text(screen, f'Score: {int(score)}', font_medium, 700, 40, black)
+    draw_text(screen, f'High score: {int(high_score)}', font_medium, 700, 10, black)
+
 
     # player_car.draw_rect(screen) #red border - delete after tests
     for obstacle in obstacles:
