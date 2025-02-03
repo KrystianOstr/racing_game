@@ -23,6 +23,7 @@ collision_sound = pygame.mixer.Sound(BASE_PATH / 'sounds' / 'collision.mp3')
 
 pygame.mixer.music.load(BASE_PATH / 'sounds' / 'background_music.mp3')
 pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(0.5)
 
 # FONTS
 
@@ -80,8 +81,10 @@ class Car:
         
         
         if keys[pygame.K_UP]:
+            pygame.mixer.music.set_volume(0.75)
             self.speed = 10
         if keys[pygame.K_DOWN]:
+            pygame.mixer.music.set_volume(0.5)
             self.speed = 5
             
     def get_rect(self):
@@ -132,16 +135,18 @@ class Obstacle:
 
         self.position_x = position_x
         self.position_y = position_y
-
+        
+        self.base_speed = speed
         self.speed = speed
 
 
     def move(self, screen_height, road_width, road_offset, all_obstacles):
+        self.speed = self.base_speed + int(score/500) # Increase speed basing on score
+        
         self.position_y += self.speed + int(background.speed * 0.5)
 
         if self.position_y > screen_height:
             self.position_y = -50
-
             valid_position = False
 
             while not valid_position:
@@ -223,6 +228,7 @@ def reset_game():
 
     pygame.mixer.music.load(BASE_PATH / 'sounds' / 'background_music.mp3')
     pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0.5)
 
     game_over = False
     
