@@ -20,10 +20,16 @@ BASE_PATH =  Path(getattr(sys, '_MEIPASS', Path(__file__).parent))
 # SOUNDS
 
 collision_sound = pygame.mixer.Sound(BASE_PATH / 'sounds' / 'collision.mp3')
+background_music = (BASE_PATH / 'sounds' / 'background_music.mp3')
+game_over_music = (BASE_PATH / 'sounds' / 'gameover.mp3')
 
-pygame.mixer.music.load(BASE_PATH / 'sounds' / 'background_music.mp3')
-pygame.mixer.music.play(-1)
-pygame.mixer.music.set_volume(0.5)
+
+def play_music(sound):
+    pygame.mixer.music.load(sound)
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0.5)
+    
+# play_music(background_music)
 
 # FONTS
 
@@ -164,6 +170,104 @@ class Obstacle:
     def draw_rect(self, screen): #red border - delete after tests
         pygame.draw.rect(screen, (255, 0, 0), self.get_rect(), 2)
 
+# CLASS: MENU
+
+class Menu:
+    def __init__(self, screen):
+        self.screen = screen
+        self.options = ['Start', 'Options', 'Exit']
+        self.current_option = 0
+        
+        self.font = pygame.font.Font(None, 50)
+        self.white = (255,255,255)
+        self.red = (255,0,0)
+        self.black = (0,0,0)
+
+    def run(self):
+        while True:
+            self.screen.fill(self.black)
+            self.draw()
+            pygame.display.flip()
+            
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if self.handle_input(event):
+                        return
+
+    def draw(self):
+        for i, option in enumerate(self.options):
+            color = self.red if i == self.current_option else self.white
+            text_surface = self.font.render(option, True, color)
+            text_rect = text_surface.get_rect(center=(400,300 + i * 60))
+            self.screen.blit(text_surface, text_rect)
+            
+    def handle_input(self, event):
+        if event.key == pygame.K_DOWN:
+            self.current_option = (self.current_option + 1) % len(self.options)
+        elif event.key == pygame.K_UP:
+            self.current_option = (self.current_option - 1) % len(self.options)
+        elif event.key == pygame.K_RETURN:
+            if self.current_option == 0: #game start
+                return True
+            elif self.current_option == 1: #settings
+                self.settings_screen()
+            elif self.current_option == 2: #exit
+                pygame.quit()
+                exit()
+        return False
+    
+    def settings_screen(self):
+        volume = pygame.mixer.music.get_volume()
+        self.settings_options = ["Volume", "Controls", "Back"]
+        self.current_setting = 0
+        
+        
+        while True:
+            self.screen.fill(self.black)
+            self.draw_settings(volume)
+            pygame.display.flip()
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.type == pygame.K_DOWN:
+                        pass
+                    elif event.type == pygame.K_UP:
+                        pass
+                    
+                    
+                    
+                    
+                    
+                    
+                    elif event.type == pygame.K_ESCAPE:
+                        return
+    
+    
+    
+    
+    
+            
+            
+menu = Menu(screen)
+menu.run()         
+
+
+
+
+
+
+
+
+
+
+
 
 obstacles = [
     Obstacle('enemy_car.png', 300, -50, 5),
@@ -187,8 +291,7 @@ def game_over_screen():
     global high_score
     save_high_score(score)
 
-    pygame.mixer.music.load(BASE_PATH / 'sounds' / 'gameover.mp3')
-    pygame.mixer.music.play(-1)
+    play_music(game_over_music)
 
     while True:
         screen.fill((255,255,255))
@@ -226,15 +329,15 @@ def reset_game():
     background.speed = 5
     score = 0
 
-    pygame.mixer.music.load(BASE_PATH / 'sounds' / 'background_music.mp3')
-    pygame.mixer.music.play(-1)
-    pygame.mixer.music.set_volume(0.5)
+    
+    play_music(background_music)
 
     game_over = False
     
 # main game loop
 
 running = True
+play_music(background_music)
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
