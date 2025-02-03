@@ -27,7 +27,10 @@ game_over_music = (BASE_PATH / 'sounds' / 'gameover.mp3')
 def play_music(sound):
     pygame.mixer.music.load(sound)
     pygame.mixer.music.play(-1)
-    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.set_volume(0.1)
+    
+play_music(background_music)
+    
     
 # play_music(background_music)
 
@@ -87,10 +90,8 @@ class Car:
         
         
         if keys[pygame.K_UP]:
-            pygame.mixer.music.set_volume(0.75)
             self.speed = 10
         if keys[pygame.K_DOWN]:
-            pygame.mixer.music.set_volume(0.5)
             self.speed = 5
             
     def get_rect(self):
@@ -222,12 +223,15 @@ class Menu:
     
     def settings_screen(self):
         volume = pygame.mixer.music.get_volume()
-        self.settings_options = ["Volume", "Controls", "Back"]
+        self.settings_options = ["Volume", "Back"]
         self.current_setting = 0
         
         
         while True:
             self.screen.fill(self.black)
+            
+            self.draw_controls_info()
+            
             self.draw_settings(volume)
             pygame.display.flip()
             
@@ -236,37 +240,52 @@ class Menu:
                     pygame.quit()
                     exit()
                 if event.type == pygame.KEYDOWN:
-                    if event.type == pygame.K_DOWN:
-                        pass
-                    elif event.type == pygame.K_UP:
-                        pass
-                    
-                    
-                    
-                    
-                    
-                    
-                    elif event.type == pygame.K_ESCAPE:
+                    if event.key == pygame.K_DOWN:
+                        self.current_setting = (self.current_setting + 1) % len(self.settings_options)
+                    elif event.key == pygame.K_UP:
+                        self.current_setting = (self.current_setting - 1) % len(self.settings_options)
+                    elif event.key == pygame.K_LEFT and self.current_setting == 0:
+                        volume = max(0.0, volume - 0.1)
+                        pygame.mixer.music.set_volume(volume)
+                    elif event.key == pygame.K_RIGHT and self.current_setting == 0:
+                        volume = min(1.0, volume + 0.1)
+                        pygame.mixer.music.set_volume(volume)
+                    elif event.key == pygame.K_RETURN and self.current_setting == 1:
+                        return
+                    elif event.key == pygame.K_ESCAPE:
                         return
     
+    def draw_controls_info(self):
+        controls_text = [
+            "Controls:",
+            "/\ Speed Up",
+            "V  Brake",
+            "<- Move Left",
+            "-> Move Right",
+            "Enter Select",
+            "ESC Back"
+        ]
+
+        for j, line in enumerate(controls_text):
+            controls_font = pygame.font.Font(None, 25)
+            controls_surface = controls_font.render(line, True, self.white)
+            controls_rect = controls_surface.get_rect(center=(400, 50 + j * 30))
+            self.screen.blit(controls_surface, controls_rect)
     
-    
-    
-    
+    def draw_settings(self, volume):   
+        for i, option in enumerate(self.settings_options):
+            color = self.red if i == self.current_setting else self.white
+            text_surface = self.font.render(option, True, color)
+            text_rect = text_surface.get_rect(center=(400, 300 + i * 60))
+            self.screen.blit(text_surface, text_rect)
             
-            
-menu = Menu(screen)
-menu.run()         
-
-
-
-
-
-
-
-
-
-
+            if option == "Volume":
+                volume_bar = "|" * int(volume * 10) + '-' * (10 - int(volume * 10))
+                volume_surface = self.font.render(f'[{volume_bar}]', True, self.white)
+                volume_rect = volume_surface.get_rect(center=(600, 300 + i * 60))
+                self.screen.blit(volume_surface, volume_rect)
+    
+      
 
 
 obstacles = [
@@ -334,10 +353,15 @@ def reset_game():
 
     game_over = False
     
+
+# MENU LOOP
+    
+menu = Menu(screen)
+menu.run()       
+
 # main game loop
 
 running = True
-play_music(background_music)
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
