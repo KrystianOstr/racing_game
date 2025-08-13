@@ -1,0 +1,67 @@
+name: Upload and Build
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: install requirements
+        run: |
+          pip install -r requirements.txt
+
+      - name: pyinstaller - one-file
+        run: |
+          pyinstaller --onefile --name RacingGame \
+            --add-data "images;images" \
+            --add-data "sounds;sounds" \
+            --noconsole \
+            racing_game.py
+
+      - name: prepare package zip
+        run: |
+          mkdir -p out
+          cp "dist/RacingGame.exe" "out/RacingGame-win-x64-${GITHUB_REF_NAME}.exe"
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RacingGame-win-x64-${{ github.ref_name }}
+          path: out/RacingGame-win-x64-${{ github.ref_name }}.exe
+
+  release:
+    needs: build-windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: RacingGame-win-x64-${{ github.ref_name }}
+          path: out
+
+      - name: create GitHub Release and upload asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          files: out/RacingGame-win-x64-${{ github.ref_name }}.exe
+          draft: false
+          prerelease: false
